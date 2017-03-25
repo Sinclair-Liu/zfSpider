@@ -7,6 +7,13 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 import smtplib
+import pickle
+
+def start():
+    score_info = ['',]
+    file = open('score.pkl','wb')
+    pickle.dump(score_info, file)
+    file.close()
 
 def _format_addr(s):
     name, addr = parseaddr(s)
@@ -55,22 +62,33 @@ def getScore():
             jd += float(i['jd'])*float(i['xf'])
     string += ('加权学分平均分：%s\n' % (cj/xf))
     string += ('平均绩点：%s\n' % (jd/xf))
-    from_addr = "sinclair_liu@sina.com"
-    password = "xxxxxx"
-    to_addr = "nxp_nihao@163.com"
-    smtp_server = "smtp.sina.com"
-    msg = MIMEText(string, 'plain', 'utf-8')
-    msg['From'] = _format_addr('云主机<%s>' % from_addr)
-    msg['To'] = _format_addr('刘宗汉 <%s>' % to_addr)
-    msg['Subject'] = Header('成绩', 'utf-8').encode()
-    server = smtplib.SMTP(smtp_server, 25)
-    server.set_debuglevel(1)
-    server.login(from_addr, password)
-    server.sendmail(from_addr, [to_addr], msg.as_string())
-    server.quit()
+    file = open('score.pkl','rb')
+    score_info = pickle.load(file)
+    file.close()
+    if string == score_info[0]:
+        pass
+    else:
+        score_info[0] = string
+        file = open('score.pkl','wb')
+        pickle.dump(score_info, file)
+        file.close()
+        from_addr = "sinclair_liu@sina.com"
+        password = "xxxxxx"
+        to_addr = "nxp_nihao@163.com"
+        smtp_server = "smtp.sina.com"
+        msg = MIMEText(string, 'plain', 'utf-8')
+        msg['From'] = _format_addr('云主机<%s>' % from_addr)
+        msg['To'] = _format_addr('刘宗汉 <%s>' % to_addr)
+        msg['Subject'] = Header('成绩', 'utf-8').encode()
+        server = smtplib.SMTP(smtp_server, 25)
+        server.set_debuglevel(1)
+        server.login(from_addr, password)
+        server.sendmail(from_addr, [to_addr], msg.as_string())
+        server.quit()
 
 def menu():
-    dict = {1:getScore}
+    dict = {0:start,1:getScore}
+    #dict[0]()
     dict[1]()
 if __name__ == '__main__':
     menu()
