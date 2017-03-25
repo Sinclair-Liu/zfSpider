@@ -3,10 +3,18 @@ from urllib import request
 import http.cookiejar
 import gzip
 import json
+from email.header import Header
+from email.mime.text import MIMEText
+from email.utils import parseaddr, formataddr
+import smtplib
+
+def _format_addr(s):
+    name, addr = parseaddr(s)
+    return formataddr((Header(name, 'utf-8').encode(), addr))
 
 def getScore():
     #根据分析得知登陆url
-    baseurl = 'http://xuanke.cufe.edu.cn/xtgl/login_login.html?yhm=%s&mm=%s&yzm='
+    #baseurl = 'http://xuanke.cufe.edu.cn/xtgl/login_login.html?yhm=%s&mm=%s&yzm='
     url = 'http://xuanke.cufe.edu.cn/xtgl/login_login.html?yhm=2015312253&mm=xxxxxx&yzm='
     #username = input('输入用户名：')
     #password = input('输入密码：')
@@ -34,20 +42,32 @@ def getScore():
     xf = 0
     cj = 0
     jd = 0
+    string = ""
     for i in list:
         if i['kcxzmc'] != '非授课':
             message = i['kcmc'] + ' 学分：' + i['xf'] + ' 成绩：' + i['cj'] + ' 绩点：' + i['jd']
-            print(message)
+            string += (message + "\n")
         if i['kcxzmc'] == '必修课' or i['kcxzmc'] == '限选课':
             xf += float(i['xf'])
             if i['cj'] == 'A':
                 i['cj'] = 94
             cj += float(i['cj'])*float(i['xf'])
             jd += float(i['jd'])*float(i['xf'])
-    print('加权学分平均分：%s' % (cj/xf))
-    print('平均绩点：%s' % (jd/xf))
-
-
+    string += ('加权学分平均分：%s\n' % (cj/xf))
+    string += ('平均绩点：%s\n' % (jd/xf))
+    from_addr = "sinclair_liu@sina.com"
+    password = "xxxxxx"
+    to_addr = "nxp_nihao@163.com"
+    smtp_server = "smtp.sina.com"
+    msg = MIMEText(string, 'plain', 'utf-8')
+    msg['From'] = _format_addr('云主机<%s>' % from_addr)
+    msg['To'] = _format_addr('刘宗汉 <%s>' % to_addr)
+    msg['Subject'] = Header('成绩', 'utf-8').encode()
+    server = smtplib.SMTP(smtp_server, 25)
+    server.set_debuglevel(1)
+    server.login(from_addr, password)
+    server.sendmail(from_addr, [to_addr], msg.as_string())
+    server.quit()
 
 def menu():
     dict = {1:getScore}
