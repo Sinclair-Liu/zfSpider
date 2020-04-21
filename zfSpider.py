@@ -1,4 +1,4 @@
-#author=刘宗汉
+#author=Sinclair Liu
 from urllib import request
 import http.cookiejar
 import gzip
@@ -78,7 +78,7 @@ def getScore():
         smtp_server = "smtp.sina.com"
         msg = MIMEText(string, 'plain', 'utf-8')
         msg['From'] = _format_addr('云主机<%s>' % from_addr)
-        msg['To'] = _format_addr('刘宗汉 <%s>' % to_addr)
+        msg['To'] = _format_addr('Sinclair Liu <%s>' % to_addr)
         msg['Subject'] = Header('成绩', 'utf-8').encode()
         server = smtplib.SMTP(smtp_server, 25)
         server.set_debuglevel(1)
